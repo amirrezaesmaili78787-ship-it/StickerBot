@@ -7,7 +7,7 @@ from telegram.ext import Application, CommandHandler, MessageHandler, ContextTyp
 BOT_TOKEN = "8960825466:AAHN3PADUXoxRFy0U_tFFGds0o4ZJ5hW79c"
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-await update.message.reply_text("""👋 به استوگیف خوش اومدی!
+    await update.message.reply_text("""👋 به استوگیف خوش اومدی!
     
 ✨ هر استیکری برام بفرست تا فایل اصلی اون رو برات استخراج کنم.
 
@@ -30,7 +30,7 @@ async def handle_sticker(update: Update, context: ContextTypes.DEFAULT_TYPE):
     try:
         if sticker.is_video:
             await status_message.edit_text("استیکر ویدیویی (WebM) است. ارسال ویدیو... 🎬")
-            await update.message.reply_video(video=open(input_path, 'rb'), caption="آماده شد! ⚡")
+            await update.message.reply_video(video=open(input_path, 'rb'), caption="خدمت شما! ⚡")
         elif sticker.is_animated:
             await status_message.edit_text("استیکر متحرک (TGS) است. استخراج سورس انیمیشن... 🔄")
             output_json = f"temp/{sticker.file_id}.json"
@@ -57,5 +57,5 @@ def main():
     print("Bot is running...")
     app.run_polling()
 
-if name == "main":
+if __name__ == "__main__":
     main()
