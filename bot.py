@@ -7,8 +7,8 @@ from telegram.ext import Application, CommandHandler, MessageHandler, ContextTyp
 BOT_TOKEN = "8960825466:AAHN3PADUXoxRFy0U_tFFGds0o4ZJ5hW79c"
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text("👋 به استوگیف خوش اومدی!
-
+await update.message.reply_text("""👋 به استوگیف خوش اومدی!
+    
 ✨ هر استیکری برام بفرست تا فایل اصلی اون رو برات استخراج کنم.
 
 📦 پشتیبانی از:
@@ -16,7 +16,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 • استیکر متحرک (TGS)
 • استیکر ویدیویی (WEBM)
 
-📩 فقط استیکر رو ارسال کن.")
+📩 فقط استیکر رو ارسال کن.""")
 
 async def handle_sticker(update: Update, context: ContextTypes.DEFAULT_TYPE):
     sticker = update.message.sticker
