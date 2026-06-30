@@ -1,17 +1,16 @@
 import asyncio
 import os
-import gzip
 from telegram import Update
 from telegram.ext import Application, CommandHandler, MessageHandler, ContextTypes, filters
 from PIL import Image
 from moviepy.editor import VideoFileClip
-from lottie.exporters.gif import export_gif
-from lottie.parsers.tgs import parse_tgs
+# استفاده از کتابخانه خالص tgs برای رندر انیمیشن‌های برداری تلگرام
+from tgs.utils import ffmpeg as tgs_ffmpeg
 
-BOT_TOKEN = "8960825466:AAHN3PADUXoxRFy0U_tFFGds0o4ZJ5hW79c"
+BOT_TOKEN = "AAHN3PADUXoxRFy0U_tFFGds0o4ZJ5hW79c"
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text("سلام امیر جان! ربات ۱۰۰٪ کامل شد. حالا هر ۳ مدل استیکر رو برات تبدیل می‌کنه! 🔥")
+    await update.message.reply_text("سلام امیر جان! ربات آماده‌ست و بدون مشکل لایبرری‌ها بالا اومد. هر ۳ مدل استیکر رو بفرست تست کنیم! 🔥")
 
 async def handle_sticker(update: Update, context: ContextTypes.DEFAULT_TYPE):
     sticker = update.message.sticker
@@ -23,18 +22,17 @@ async def handle_sticker(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await file.download_to_drive(input_path)
 
     try:
-        # ۱. استیکرهای متحرک برداری (TGS)
+        # ۱. استیکرهای متحرک قدیمی برداری (TGS)
         if sticker.is_animated:
-            await status_message.edit_text("در حال رندر کردن استیکر متحرک برداری به گیف... 🎨 (کمی زمان‌بر)")
+            await status_message.edit_text("در حال رندر کردن استیکر متحرک سنتی به گیف... 🎨")
             output_gif = f"temp/{sticker.file_id}.gif"
             
-            # باز کردن و رندر کردن فایل TGS به GIF
-            animation = parse_tgs(input_path)
-            export_gif(animation, output_gif)
+            # تبدیل مستقیم فایل برداری TGS به انیمیشن متحرک با ابزار tgs و ffmpeg
+            tgs_ffmpeg.to_gif(input_path, output_gif)
             
-            await update.message.reply_animation(animation=open(output_gif, 'rb'), caption="استیکر متحرک با موفقیت تبدیل به گیف شد! 😍")
+            await update.message.reply_animation(animation=open(output_gif, 'rb'), caption="استیکر متحرک برداری شما با موفقیت به گیف تبدیل شد! 😍")
 
-        # ۲. استیکرهای ویدیویی (WebM)
+        # ۲. استیکرهای ویدیویی جدید (WebM)
         elif sticker.is_video:
             await status_message.edit_text("در حال تبدیل ویدیو استیکر به گیف... 🎬")
             output_gif = f"temp/{sticker.file_id}.gif"
@@ -45,7 +43,7 @@ async def handle_sticker(update: Update, context: ContextTypes.DEFAULT_TYPE):
             
             await update.message.reply_animation(animation=open(output_gif, 'rb'), caption="استیکر ویدیویی به گیف تبدیل شد! ⚡")
 
-        # ۳. استیکرهای ثابت (WebP)
+        # ۳. استیکرهای ثابت معمولی (WebP)
         else:
             await status_message.edit_text("در حال تبدیل استیکر به عکس... 📸")
             output_png = f"temp/{sticker.file_id}.png"
@@ -57,7 +55,7 @@ async def handle_sticker(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     except Exception as e:
         print(f"Error: {e}")
-        await update.message.reply_text("خطایی در رندر فایل رخ داد. دوباره تلاش کن. ❌")
+        await update.message.reply_text("خطایی در رندر یا تبدیل فایل رخ داد. دوباره تلاش کن. ❌")
     
     finally:
         try: await status_message.delete()

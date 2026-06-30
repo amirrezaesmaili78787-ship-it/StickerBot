@@ -1,3 +1,4 @@
 python-telegram-bot==21.3
 pillow==10.4.0
 moviepy==1.0.3
+tgs==0.0.8
