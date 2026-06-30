@@ -1,32 +1,17 @@
 import os
-import sys
-import subprocess
-
-# --- ترفند جادویی تک‌فایل: نصب خودکار پیش‌نیازها روی سرور ریلوای ---
-try:
-    from telegram import Update
-    from telegram.ext import Application, CommandHandler, MessageHandler, ContextTypes, filters
-except ImportError:
-    # اگر کتابخونه نصب نبود، خود کد اون رو روی سرور نصب میکنه
-    subprocess.check_call([sys.executable, "-m", "pip", "install", "python-telegram-bot==21.3"])
-    from telegram import Update
-    from telegram.ext import Application, CommandHandler, MessageHandler, ContextTypes, filters
-
 import gzip
+from telegram import Update
+from telegram.ext import Application, CommandHandler, MessageHandler, ContextTypes, filters
 
-# توکن شما با موفقیت جایگذاری شد
+# توکن اختصاصی شما
 BOT_TOKEN = "8960825466:AAHN3PADUXoxRFy0U_tFFGds0o4ZJ5hW79c"
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text(
-        "سلام امیر جان! ربات تک‌فایله با توکن اختصاصی بالا اومد و روشن شد. 🔥\n"
-        "الان هر استیکری برام بفرستی، پردازشش می‌کنم و خروجی رو برات می‌فرستم!"
-    )
+    await update.message.reply_text("سلام امیر جان! ربات بالاخره راه افتاد و روشن شد. 🔥\nهر استیکری بفرستی برات خروجی می‌گیرم.")
 
 async def handle_sticker(update: Update, context: ContextTypes.DEFAULT_TYPE):
     sticker = update.message.sticker
-    status_message = await update.message.reply_text("در حال دریافت و پردازش استیکر... ⏳")
-    
+    status_message = await update.message.reply_text("در حال پردازش... ⏳")
     os.makedirs("temp", exist_ok=True)
     
     file = await context.bot.get_file(sticker.file_id)
@@ -35,26 +20,22 @@ async def handle_sticker(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     try:
         if sticker.is_video:
-            await status_message.edit_text("این یک استیکر ویدیویی متحرک (WebM) است. در حال ارسال... 🎬")
-            await update.message.reply_video(video=open(input_path, 'rb'), caption="خدمت شما، نسخه ویدیویی استیکر متحرک! ⚡")
-            
+            await status_message.edit_text("استیکر ویدیویی (WebM) است. ارسال ویدیو... 🎬")
+            await update.message.reply_video(video=open(input_path, 'rb'), caption="خدمت شما! ⚡")
         elif sticker.is_animated:
-            await status_message.edit_text("این یک استیکر متحرک سنتی (TGS) است. در حال استخراج سورس انیمیشن... 🔄")
+            await status_message.edit_text("استیکر متحرک (TGS) است. استخراج سورس انیمیشن... 🔄")
             output_json = f"temp/{sticker.file_id}.json"
             with gzip.open(input_path, 'rb') as f_in:
                 with open(output_json, 'wb') as f_out:
                     f_out.write(f_in.read())
-            await update.message.reply_document(document=open(output_json, 'rb'), filename="animation.json", caption="سورس انیمیشن متحرک استخراج شد! 📑")
+            await update.message.reply_document(document=open(output_json, 'rb'), filename="animation.json", caption="سورس متحرک استخراج شد! 📑")
             if os.path.exists(output_json): os.remove(output_json)
-            
         else:
-            await status_message.edit_text("در حال ارسال فایل تصویر استیکر ثابت... 📸")
-            await update.message.reply_document(document=open(input_path, 'rb'), filename="sticker.webp", caption="فایل تصویر استیکر ثابت شما! 🖼️")
-
+            await status_message.edit_text("ارسال استیکر ثابت... 📸")
+            await update.message.reply_document(document=open(input_path, 'rb'), filename="sticker.webp", caption="تصویر استیکر شما! 🖼️")
     except Exception as e:
         print(f"Error: {e}")
-        await update.message.reply_text("مشکلی در ارسال خروجی پیش آمد. ❌")
-        
+        await update.message.reply_text("خطایی رخ داد. ❌")
     finally:
         try: await status_message.delete()
         except: pass
@@ -62,11 +43,9 @@ async def handle_sticker(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 def main():
     app = Application.builder().token(BOT_TOKEN).build()
-    
     app.add_handler(CommandHandler("start", start))
     app.add_handler(MessageHandler(filters.Sticker.ALL, handle_sticker))
-
-    print("Bot is successfully running with your token...")
+    print("Bot is running...")
     app.run_polling()
 
 if __name__ == "__main__":
